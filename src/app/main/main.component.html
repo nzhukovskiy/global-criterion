@@ -1,0 +1,133 @@
+<div id="plot"></div>
+<div class="container" [formGroup]="form">
+  <div class="selects">
+    <div>
+      <h4>Количество критериев</h4>
+      <mat-form-field class="criteriaSelect" appearance="fill">
+        <mat-label>Количество критериев</mat-label>
+        <mat-select [(value)]="selectedCriteriaCount" #criteriaSelect (selectionChange)="changeCriteriaCount(criteriaSelect.value)">
+          <mat-option *ngFor="let criterionCount of criteriaCountValues" [value]="criterionCount">
+            {{criterionCount}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div>
+      <h4>Количество переменных</h4>
+      <mat-form-field appearance="fill">
+        <mat-label>Количество переменных</mat-label>
+        <mat-select [(value)]="selectedVariablesCount" #variablesSelect (selectionChange)="changeVariablesCount(variablesSelect.value)">
+          <mat-option *ngFor="let variablesCount of variableCountValues" [value]="variablesCount">
+            {{variablesCount}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div>
+      <h4>Количество ограничений</h4>
+      <mat-form-field appearance="fill">
+        <mat-label>Количество ограничений</mat-label>
+        <mat-select [(value)]="selectedConstraintsCount" #constraintsSelect (selectionChange)="changeConstraintsCount(constraintsSelect.value)">
+          <mat-option *ngFor="let constraintCount of constraintCountValues" [value]="constraintCount">
+            {{constraintCount}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div>
+    Количество критериев: {{criteriaCount}}<br>
+    Количество переменных: {{variablesCount}}<br>
+    Количество ограничений: {{constraintsCount}}<br>
+  </div>
+
+  <h2>Критерии</h2>
+  <form>
+    <mat-radio-group [(ngModel)]="globalCriterion" name="radio-group">
+      <div class="table-row" *ngFor="let row of formArray.controls;index as i">
+        <p>U<sub>{{i+1}}</sub></p>
+        <div *ngFor="let col of getFormArray(row).controls; index as j">
+          <mat-form-field class="example-full-width" appearance="fill">
+            <mat-label>X<sub>{{j+1}}</sub></mat-label>
+            <input matInput type="number" value=0 [formControl]="getFormControl(col)">
+          </mat-form-field>
+        </div>
+        <mat-radio-button #globalCheck  name="radio-group" [value]="i">Главный критерий</mat-radio-button>
+        <div class="constraints" *ngIf="globalCheck.checked !== true">
+          <mat-form-field class="example-full-width" appearance="fill">
+            <mat-label>Направление оптимизации</mat-label>
+            <mat-select [(value)]="criterionGoal[i]">
+              <mat-option value="max">min</mat-option>
+              <mat-option value="min">max</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="example-full-width" appearance="fill">
+            <mat-label>Пороговое значение</mat-label>
+            <input name="constraint-value-input" [(ngModel)]="criterionThreshold[i]" matInput type="number" value=0>
+          </mat-form-field>
+        </div>
+        <div *ngIf="globalCheck.checked === true">
+          <mat-form-field class="example-full-width" appearance="fill">
+            <mat-label>Направление оптимизации</mat-label>
+            <mat-select [(value)]="optimizationGoal">
+              <mat-option value="max">max</mat-option>
+              <mat-option value="min">min</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!--<input matInput *ngFor="let col of getFormArray(row).controls" [formControl]="getFormGroup(col)">-->
+      </div>
+    </mat-radio-group>
+
+  </form>
+  <div>
+    Главный критерий: {{globalCriterion}}
+  </div>
+  <h2>Ограничения</h2>
+  <form>
+    <div class="table-row" *ngFor="let row of constraintsFormArray.controls;index as i">
+      <div *ngFor="let col of getFormArray(row).controls; index as j">
+        <mat-form-field class="example-full-width" appearance="fill">
+          <mat-label>X{{j+1}}</mat-label>
+          <input matInput type="number" value=0 [formControl]="getFormControl(col)">
+        </mat-form-field>
+      </div>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Тип ограничения</mat-label>
+        <mat-select [(value)]="constraintType[i]">
+          <mat-option value="max"><=</mat-option>
+          <mat-option value="min">>=</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Ограничение</mat-label>
+        <input name="constraint-value-input" [(ngModel)]="constraintValues[i]" matInput type="number">
+      </mat-form-field>
+    </div>
+  </form>
+  <!--<form>
+    <ng-container *ngFor="let row of data; index as i">
+      <ng-container *ngFor="let column of row;index as j">
+        <div>
+          {{data[i][j]}}
+        </div>
+        <input [(ngModel)]="data[i][j]" name="cell">
+      </ng-container>
+    </ng-container>
+  </form>-->
+  <button class = "register_button" mat-raised-button color="primary" (click)="solveTask()">Решить</button>
+  <h2>Решение</h2>
+  <div *ngIf="results != undefined">
+    <div>
+      Значение функции:
+      {{results.result}}
+    </div>
+    <div>Оптимальный план:</div>
+    <div *ngFor="let result of getResults(); index as i">
+      X{{i+1}}:{{result}}
+    </div>
+  </div>
+</div>
+
