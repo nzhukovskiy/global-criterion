@@ -64,7 +64,7 @@
           </mat-form-field>
           <mat-form-field class="example-full-width" appearance="fill">
             <mat-label>Пороговое значение</mat-label>
-            <input name="constraint-value-input" [(ngModel)]="criterionThreshold[i]" matInput type="number" value=0>
+            <input name="constraint-value-input" [formControl]="getFormControl(criterionThreshold.at(i))" matInput type="number" value=0>
           </mat-form-field>
         </div>
         <div *ngIf="globalCheck.checked === true">
@@ -99,11 +99,12 @@
         <mat-select [(value)]="constraintType[i]">
           <mat-option value="max"><=</mat-option>
           <mat-option value="min">>=</mat-option>
+          <mat-option value="equal">=</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field class="example-full-width" appearance="fill">
         <mat-label>Ограничение</mat-label>
-        <input name="constraint-value-input" [(ngModel)]="constraintValues[i]" matInput type="number">
+        <input name="constraint-value-input" [formControl]="getFormControl(constraintValues.at(i))" matInput type="number">
       </mat-form-field>
     </div>
   </form>

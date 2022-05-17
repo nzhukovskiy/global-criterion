@@ -27,7 +27,6 @@ export class MainComponent implements OnInit {
   formArray =new FormArray([]);
   constraintsFormArray =new FormArray([]);
   constructor(private fb:FormBuilder) {
-
   }
 
   criteriaCountValues : number[] = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -41,9 +40,9 @@ export class MainComponent implements OnInit {
   selectedConstraintsCount: number = 2;
   globalCriterion: number = 0;
   criterionGoal : string[] = [];
-  criterionThreshold : number[] = [];
+  criterionThreshold = new FormArray([]);
   constraintType : string[] = [];
-  constraintValues : number[] = [];
+  constraintValues = new FormArray([]);
   optimizationGoal: string = "max";
   results: any;
   data: number[][] = [[1, 2, 3],[4, 5, 6]];
@@ -63,11 +62,11 @@ export class MainComponent implements OnInit {
     }
     for (let i = 0; i < this.criteriaCount; i++) {
       this.criterionGoal.push("max");
-      this.criterionThreshold.push(0);
+      this.criterionThreshold.push(new FormControl(0));
     }
     for (let i = 0; i < this.constraintsCount; i++) {
       this.constraintType.push("max");
-      this.constraintValues.push(0);
+      this.constraintValues.push(new FormControl(0));
     }
     console.log(this.formArray);
     /*this.data.forEach( el => {
@@ -213,13 +212,25 @@ export class MainComponent implements OnInit {
         }
       }
     }
+    let oldCriterionGoal = this.criterionGoal;
     this.criterionGoal = [];
     for (let i = 0; i < this.criteriaCount; i++) {
-      this.criterionGoal.push("max");
+      if (i < oldCriterionGoal.length) {
+        this.criterionGoal.push(oldCriterionGoal[i]);
+      }
+      else {
+        this.criterionGoal.push("max");
+      }
     }
-    this.criterionThreshold = [];
+    let oldThresholdValues = this.criterionThreshold.value;
+    this.criterionThreshold.clear();
     for (let i = 0; i < this.criteriaCount; i++) {
-      this.criterionThreshold.push(0);
+      if (i < oldThresholdValues.length) {
+        this.criterionThreshold.push(new FormControl(oldThresholdValues[i]));
+      }
+      else {
+        this.criterionThreshold.push(new FormControl(0));
+      }
     }
   }
   resizeConstraintsMatrix() {
@@ -247,14 +258,14 @@ export class MainComponent implements OnInit {
       }
 
     }
-    let oldConstraintValues = this.constraintValues;
-    this.constraintValues = [];
+    let oldConstraintValues = this.constraintValues.value;
+    this.constraintValues.clear();
     for (let i = 0; i < this.constraintsCount; i++) {
       if (i < oldConstraintValues.length) {
-        this.constraintValues.push(oldConstraintValues[i]);
+        this.constraintValues.push(new FormControl(oldConstraintValues[i]));
       }
       else {
-        this.constraintValues.push(0);
+        this.constraintValues.push(new FormControl(0));
       }
     }
     console.log(this.constraintValues);
@@ -269,7 +280,7 @@ export class MainComponent implements OnInit {
     for (let i = 0; i < this.criteriaCount; i++) {
       if (i !== this.globalCriterion) {
         let constraintTypeModel : Record<string, any>= {}
-        constraintTypeModel[this.criterionGoal[i]] = this.criterionThreshold[i];
+        constraintTypeModel[this.criterionGoal[i]] = this.criterionThreshold.at(i).value;
         console.log(constraintTypeModel);
         constraintModel["u"+(i+1).toString()] = constraintTypeModel;
         console.log(constraintModel);
@@ -282,14 +293,14 @@ export class MainComponent implements OnInit {
         variableCriterionModel["u"+(i+1).toString()] = this.formArray.value[i][j];
       }
       for (let i = 0; i < this.constraintsCount; i++) {
-        variableCriterionModel["u"+(this.criteriaCount +i+1).toString()] = this.formArray.value[i][j];
+        variableCriterionModel["u"+(this.criteriaCount +i+1).toString()] = this.constraintsFormArray.value[i][j];
       }
       variablesModel["x"+(j+1).toString()] = variableCriterionModel;
     }
     //Constraints matrix
     for (let i = 0; i < this.constraintsCount; i++) {
         let constraintTypeModel : Record<string, any>= {}
-        constraintTypeModel[this.constraintType[i]] = this.constraintValues[i];
+        constraintTypeModel[this.constraintType[i]] = this.constraintValues.at(i).value;
         console.log(constraintTypeModel);
         constraintModel["u"+(this.criteriaCount + i+1).toString()] = constraintTypeModel;
         console.log(constraintModel);
@@ -323,9 +334,15 @@ export class MainComponent implements OnInit {
   getResults() {
     let results = [];
     for (let i = 0; i < this.variablesCount; i++) {
-      results.push(this.results["x"+(i+1).toString()])
+      if (this.results["x"+(i+1).toString()] !== undefined) {
+        results.push(this.results["x"+(i+1).toString()])
+      }
+      else {
+        results.push(0);
+      }
+      //results.push(this.results["x"+(i+1).toString()])
     }
-    return results.reverse();
+    return results;
   }
   trackByIdx(index: number, obj: any): any {
     return index;

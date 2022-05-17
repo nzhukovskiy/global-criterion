@@ -8,6 +8,7 @@ import { MainComponent } from './main/main.component';
 import {MatFormFieldModule} from "@angular/material/form-field";
 import { MaterialModule } from './material/material.module';
 import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {NgxMathFunctionPlotterModule} from "ngx-math-function-plotter";
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import {FormBuilder, FormsModule, ReactiveFormsModule} from "@angular/forms";
     MatFormFieldModule,
     MaterialModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    NgxMathFunctionPlotterModule
   ],
   providers: [FormBuilder],
   bootstrap: [AppComponent]
