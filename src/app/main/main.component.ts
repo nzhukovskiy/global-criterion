@@ -34,7 +34,7 @@ export class MainComponent implements OnInit {
     layout: {width: 900, height: 500, title: 'График'}
   };
   data : Data[] = [];
-  criteriaCountValues : number[] = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+  criteriaCountValues : number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   variableCountValues : number[] = [2, 3, 4, 5, 6, 7, 8, 9, 10];
   constraintCountValues : number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   criteriaCount: number = 2;
@@ -301,7 +301,41 @@ export class MainComponent implements OnInit {
     if (this.results.feasible !== undefined && this.variablesCount == 2) {
       for (let i = 0; i < this.criteriaCount; i++) {
         if (i === this.globalCriterion) {
-
+          let gradientExpression = `(${this.formArray.value[i][1]}*x)/${this.formArray.value[i][0]}`;
+          let expr = math.compile(gradientExpression);
+          let xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
+          let yValues = xValues.map(function (x) {
+            return expr.evaluate({x: x})
+          })
+          const gradientTrace : Data= {
+            x: xValues,
+            y: yValues,
+            type: 'scatter',
+            name: 'Градиент целевой функции',
+            line: {
+              dash: 'solid',
+              width: 4
+            }
+          }
+          this.data.push(gradientTrace);
+          let normalToGradientExpression = `(-1/(${this.formArray.value[i][1]}/${this.formArray.value[i][0]}))*(x-${this.results.x1})+${this.results.x2}`;
+          expr = math.compile(normalToGradientExpression);
+          console.log(normalToGradientExpression);
+          let normalXValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
+          let normalYValues = normalXValues.map(function (x) {
+            return expr.evaluate({x: x})
+          })
+          const normalToGradientTrace : Data= {
+            x: normalXValues,
+            y: normalYValues,
+            type: 'scatter',
+            name: 'Перпендикуляр к градиенту',
+            line: {
+              dash: 'dot',
+              width: 2
+            }
+          }
+          this.data.push(normalToGradientTrace);
         }
         else {
           let xValues : Datum[] = [];
@@ -311,7 +345,7 @@ export class MainComponent implements OnInit {
             expression = `(${this.criterionThreshold.at(i).value})/${this.formArray.value[i][1]}`;
             const expr = math.compile(expression)
 
-            xValues = this.generateRange(-10, 10, 0.01);
+            xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
             yValues = xValues.map(function (x) {
               return expr.evaluate({x: x})
             })
@@ -320,7 +354,7 @@ export class MainComponent implements OnInit {
             expression = `(${this.criterionThreshold.at(i).value})/${this.formArray.value[i][0]}`;
             const expr = math.compile(expression)
 
-            yValues = this.generateRange(-10, 10, 0.01);
+            yValues = this.generateRange(this.results.x2-50, this.results.x2+50, 0.01);
             xValues = yValues.map(function (x) {
               return expr.evaluate({x: x})
             })
@@ -329,7 +363,7 @@ export class MainComponent implements OnInit {
             expression = `(${this.criterionThreshold.at(i).value}-${this.formArray.value[i][0]}*x)/${this.formArray.value[i][1]}`;
             const expr = math.compile(expression)
 
-            xValues = this.generateRange(-10, 10, 0.01);
+            xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
             yValues = xValues.map(function (x) {
               return expr.evaluate({x: x})
             })
@@ -353,7 +387,7 @@ export class MainComponent implements OnInit {
           expression = `(${this.constraintValues.at(i).value})/${this.constraintsFormArray.value[i][1]}`;
           const expr = math.compile(expression)
 
-          xValues = this.generateRange(-10, 10, 0.01);
+          xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
           yValues = xValues.map(function (x) {
             return expr.evaluate({x: x})
           })
@@ -362,7 +396,7 @@ export class MainComponent implements OnInit {
           expression = `(${this.constraintValues.at(i).value})/${this.constraintsFormArray.value[i][0]}`;
           const expr = math.compile(expression)
 
-          yValues = this.generateRange(-10, 10, 0.01);
+          yValues = this.generateRange(this.results.x2-50, this.results.x2+50, 0.01);
           xValues = yValues.map(function (x) {
             return expr.evaluate({x: x})
           })
@@ -371,7 +405,7 @@ export class MainComponent implements OnInit {
           expression = `(${this.constraintValues.at(i).value}-${this.constraintsFormArray.value[i][0]}*x)/${this.constraintsFormArray.value[i][1]}`;
           const expr = math.compile(expression)
 
-          xValues = this.generateRange(-10, 10, 0.01);
+          xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
           yValues = xValues.map(function (x) {
             return expr.evaluate({x: x})
           })
@@ -385,13 +419,14 @@ export class MainComponent implements OnInit {
         console.log(trace);
         this.data.push(trace);
       }
-      const trace : Data= {
+      const optimalPointTrace : Data= {
         x: [this.getResults()[0]],
         y: [this.getResults()[1]],
         type: 'scatter',
         name: 'Оптимальная точка'
       }
-      this.data.push(trace);
+      this.data.push(optimalPointTrace);
+
     }
   }
   getResults() {

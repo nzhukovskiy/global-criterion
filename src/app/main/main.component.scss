@@ -17,11 +17,23 @@
 .constraints {
   display: flex;
 }
-.table-row p {
+.table-row p, .table-row mat-radio-button {
   display: inline-block;
   margin-top: auto;
   margin-bottom: auto;
+  margin-right: 15px;
 }
 plotly-plot {
   width: 100%;
+}
+
+h1 {
+  text-align: center;
+}
+.number-input {
+  width: 140px;
+  margin-right: 20px;
+}
+.variablesSelect, .constraintsSelect, .criteriaSelect {
+  margin-right: 20px;
 }

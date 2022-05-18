@@ -1,5 +1,6 @@
 
 <div class="container" >
+  <h1>Метод главного критерия</h1>
   <div class="selects">
     <div>
       <h4>Количество критериев</h4>
@@ -14,7 +15,7 @@
     </div>
     <div>
       <h4>Количество переменных</h4>
-      <mat-form-field appearance="fill">
+      <mat-form-field class="variablesSelect" appearance="fill">
         <mat-label>Количество переменных</mat-label>
         <mat-select [(value)]="variablesCount" #variablesSelect (selectionChange)="changeVariablesCount(variablesSelect.value)">
           <mat-option *ngFor="let variablesCount of variableCountValues" [value]="variablesCount">
@@ -25,7 +26,7 @@
     </div>
     <div>
       <h4>Количество ограничений</h4>
-      <mat-form-field appearance="fill">
+      <mat-form-field class="constraintsSelect" appearance="fill">
         <mat-label>Количество ограничений</mat-label>
         <mat-select [(value)]="constraintsCount" #constraintsSelect (selectionChange)="changeConstraintsCount(constraintsSelect.value)">
           <mat-option *ngFor="let constraintCount of constraintCountValues" [value]="constraintCount">
@@ -48,7 +49,7 @@
       <div class="table-row" *ngFor="let row of formArray.controls;index as i">
         <p>U<sub>{{i+1}}</sub></p>
         <div *ngFor="let col of getFormArray(row).controls; index as j">
-          <mat-form-field class="example-full-width" appearance="fill">
+          <mat-form-field class="number-input" appearance="fill">
             <mat-label>X<sub>{{j+1}}</sub></mat-label>
             <input matInput type="number" value=0 [formControl]="getFormControl(col)">
           </mat-form-field>
@@ -89,7 +90,7 @@
   <form>
     <div class="table-row" *ngFor="let row of constraintsFormArray.controls;index as i">
       <div *ngFor="let col of getFormArray(row).controls; index as j">
-        <mat-form-field class="example-full-width" appearance="fill">
+        <mat-form-field class="number-input" appearance="fill">
           <mat-label>X{{j+1}}</mat-label>
           <input matInput type="number" value=0 [formControl]="getFormControl(col)">
         </mat-form-field>
@@ -102,7 +103,7 @@
           <mat-option value="equal">=</mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-form-field class="example-full-width" appearance="fill">
+      <mat-form-field class="number-input" appearance="fill">
         <mat-label>Ограничение</mat-label>
         <input name="constraint-value-input" [formControl]="getFormControl(constraintValues.at(i))" matInput type="number">
       </mat-form-field>
@@ -113,16 +114,6 @@
       X<sub>{{i+1}}</sub>>=0
     </mat-checkbox>
   </div>
-  <!--<form>
-    <ng-container *ngFor="let row of data; index as i">
-      <ng-container *ngFor="let column of row;index as j">
-        <div>
-          {{data[i][j]}}
-        </div>
-        <input [(ngModel)]="data[i][j]" name="cell">
-      </ng-container>
-    </ng-container>
-  </form>-->
   <button class = "register_button" mat-raised-button color="primary" (click)="solveTask()">Решить</button>
   <h2>Решение</h2>
   <div *ngIf="results != undefined">
