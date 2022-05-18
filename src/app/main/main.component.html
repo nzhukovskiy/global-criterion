@@ -1,11 +1,11 @@
-<div id="plot"></div>
-<div class="container" [formGroup]="form">
+
+<div class="container" >
   <div class="selects">
     <div>
       <h4>Количество критериев</h4>
       <mat-form-field class="criteriaSelect" appearance="fill">
         <mat-label>Количество критериев</mat-label>
-        <mat-select [(value)]="selectedCriteriaCount" #criteriaSelect (selectionChange)="changeCriteriaCount(criteriaSelect.value)">
+        <mat-select [(value)]="criteriaCount" #criteriaSelect (selectionChange)="changeCriteriaCount(criteriaSelect.value)">
           <mat-option *ngFor="let criterionCount of criteriaCountValues" [value]="criterionCount">
             {{criterionCount}}
           </mat-option>
@@ -16,7 +16,7 @@
       <h4>Количество переменных</h4>
       <mat-form-field appearance="fill">
         <mat-label>Количество переменных</mat-label>
-        <mat-select [(value)]="selectedVariablesCount" #variablesSelect (selectionChange)="changeVariablesCount(variablesSelect.value)">
+        <mat-select [(value)]="variablesCount" #variablesSelect (selectionChange)="changeVariablesCount(variablesSelect.value)">
           <mat-option *ngFor="let variablesCount of variableCountValues" [value]="variablesCount">
             {{variablesCount}}
           </mat-option>
@@ -27,7 +27,7 @@
       <h4>Количество ограничений</h4>
       <mat-form-field appearance="fill">
         <mat-label>Количество ограничений</mat-label>
-        <mat-select [(value)]="selectedConstraintsCount" #constraintsSelect (selectionChange)="changeConstraintsCount(constraintsSelect.value)">
+        <mat-select [(value)]="constraintsCount" #constraintsSelect (selectionChange)="changeConstraintsCount(constraintsSelect.value)">
           <mat-option *ngFor="let constraintCount of constraintCountValues" [value]="constraintCount">
             {{constraintCount}}
           </mat-option>
@@ -108,6 +108,11 @@
       </mat-form-field>
     </div>
   </form>
+  <div *ngFor="let variableBound of isVariableBounded; index as i">
+    <mat-checkbox [(ngModel)]="variableBound.restricted">
+      X<sub>{{i+1}}</sub>>=0
+    </mat-checkbox>
+  </div>
   <!--<form>
     <ng-container *ngFor="let row of data; index as i">
       <ng-container *ngFor="let column of row;index as j">
@@ -127,8 +132,13 @@
     </div>
     <div>Оптимальный план:</div>
     <div *ngFor="let result of getResults(); index as i">
-      X{{i+1}}:{{result}}
+      X<sub>{{i+1}}</sub>:{{result}}
     </div>
+    <plotly-plot *ngIf="variablesCount==2" [data]="data" [layout]="graph.layout"></plotly-plot>
   </div>
+
+
+
+
 </div>
 
