@@ -37,11 +37,7 @@
     </div>
   </div>
 
-  <div>
-    Количество критериев: {{criteriaCount}}<br>
-    Количество переменных: {{variablesCount}}<br>
-    Количество ограничений: {{constraintsCount}}<br>
-  </div>
+
 
   <h2>Критерии</h2>
   <form>
@@ -54,7 +50,7 @@
             <input matInput type="number" value=0 [formControl]="getFormControl(col)">
           </mat-form-field>
         </div>
-        <mat-radio-button #globalCheck  name="radio-group" [value]="i">Главный критерий</mat-radio-button>
+        <mat-radio-button #globalCheck  name="radio-group" [value]="i" [color]="primaryColor">Главный критерий</mat-radio-button>
         <div class="constraints" *ngIf="globalCheck.checked !== true">
           <mat-form-field class="example-full-width" appearance="fill">
             <mat-label>Направление оптимизации</mat-label>
@@ -110,22 +106,27 @@
     </div>
   </form>
   <div *ngFor="let variableBound of isVariableBounded; index as i">
-    <mat-checkbox [(ngModel)]="variableBound.restricted">
+    <mat-checkbox [(ngModel)]="variableBound.restricted" [color]="primaryColor">
       X<sub>{{i+1}}</sub>>=0
     </mat-checkbox>
   </div>
   <button class = "register_button" mat-raised-button color="primary" (click)="solveTask()">Решить</button>
   <h2>Решение</h2>
   <div *ngIf="results != undefined">
-    <div>
-      Значение функции:
-      {{results.result}}
+    <div *ngIf="results.feasible == true && results.bounded == true">
+      <div>
+        Значение функции:
+        {{results.result}}
+      </div>
+      <div>Оптимальный план:</div>
+      <div *ngFor="let result of getResults(); index as i">
+        X<sub>{{i+1}}</sub>:{{result}}
+      </div>
+      <plotly-plot *ngIf="variablesCount==2" [data]="data" [layout]="graph.layout"></plotly-plot>
     </div>
-    <div>Оптимальный план:</div>
-    <div *ngFor="let result of getResults(); index as i">
-      X<sub>{{i+1}}</sub>:{{result}}
+    <div *ngIf="!(results.feasible == true && results.bounded == true)">
+      Решения не существует
     </div>
-    <plotly-plot *ngIf="variablesCount==2" [data]="data" [layout]="graph.layout"></plotly-plot>
   </div>
 
 

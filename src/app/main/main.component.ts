@@ -11,6 +11,7 @@ import {Datum} from "plotly.js";
 import {Plotly} from "angular-plotly.js/lib/plotly.interface";
 import Data = Plotly.Data;
 import {Variable} from "../variable";
+import {ThemePalette} from "@angular/material/core";
 
 //import functionPlot from "function-plot";
 
@@ -26,13 +27,21 @@ export class MainComponent implements OnInit {
   @ViewChild('plot') plot!: ElementRef;
   formArray =new FormArray([]);
   constraintsFormArray =new FormArray([]);
+
   constructor(private fb:FormBuilder) {
   }
 
   public graph = {
     data: [],
-    layout: {width: 900, height: 500, title: 'График'}
+    layout: {width: 900, height: 755, title: 'График',
+      xaxis: {
+      },
+      yaxis: {
+        scaleanchor: "x"
+      }
+    }
   };
+  primaryColor: ThemePalette = 'primary';
   data : Data[] = [];
   criteriaCountValues : number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   variableCountValues : number[] = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -50,24 +59,7 @@ export class MainComponent implements OnInit {
   results: any;
   ngOnInit(): void {
 
-    const expression = "4 * sin(x) + 5 * cos(x/2)";
-    const expr = math.compile(expression)
 
-    // evaluate the expression repeatedly for different values of x
-    /*const xValues : Datum[] = [-10, -9, -8, -7, -6, -5, -4, -3, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    const variable : Datum[] = [1, 2, 3]
-    const yValues = xValues.map(function (x) {
-      return expr.evaluate({x: x})
-    })
-
-    // render the plot using plotly
-    const trace1 : Data= {
-      x: xValues,
-      y: yValues,
-      type: 'scatter'
-    }
-    const data : Data[] = [trace1]
-    this.data = data;*/
     for (let i = 0; i < this.criteriaCount; i++) {
       this.formArray.push(new FormArray([]))
       for (let j = 0; j < this.variablesCount; j++) {
@@ -91,42 +83,16 @@ export class MainComponent implements OnInit {
     for (let i = 0; i < this.variablesCount; i++) {
       this.isVariableBounded.push(new Variable(true));
     }
-    console.log(this.formArray);
-    var solver = Solver,
-      results,
-      model = {
-        "optimize": "u1",
-        "opType": "max",
-        "constraints": {
-          "u2": {"max": 30},
-          "u3": {"min": 2},
-          "u4": {"max": 50},
-          "u5": {"max": 54}
-        },
-        "variables": {
-          "x1": {
-            "u1": 8,
-            "u2": 10,
-            "u3": 1,
-            "u4": 10,
-            "u5": 6
-          },
-          "x2": {
-            "u1": 6,
-            "u2": 5,
-            "u3": 0,
-            "u4": 5,
-            "u5": 9
-          }
-        },
-      };
-
-    results = solver.Solve(model);
-    console.log(results);
   }
-  getFormArray(control: AbstractControl) { return control as FormArray; }
-  getFormControl(control: AbstractControl) { return control as FormControl; }
-  getFormGroup(control: AbstractControl) { return control as FormGroup; }
+  getFormArray(control: AbstractControl) {
+    return control as FormArray;
+  }
+  getFormControl(control: AbstractControl) {
+    return control as FormControl;
+  }
+  getFormGroup(control: AbstractControl) {
+    return control as FormGroup;
+  }
   changeCriteriaCount(newValue: number) {
     this.criteriaCount = newValue;
     this.resizeMatrix();
@@ -142,20 +108,24 @@ export class MainComponent implements OnInit {
   }
 
 
-  resizeMatrix() {
-    let oldValues = this.formArray.value;
-    this.formArray.clear();
-    for (let i = 0; i < this.criteriaCount; i++) {
-      this.formArray.push(new FormArray([]))
-      for (let j = 0; j < this.variablesCount; j++) {
+  resizeFormMatrix(formArray: FormArray, newRows: number, newCols: number) {
+    let oldValues = formArray.value;
+    formArray.clear();
+    for (let i = 0; i < newRows; i++) {
+      formArray.push(new FormArray([]))
+      for (let j = 0; j < newCols; j++) {
         if (i < oldValues.length && j < oldValues[i].length) {
-          (this.formArray.at(i) as FormArray).push(new FormControl(oldValues[i][j]))
+          (formArray.at(i) as FormArray).push(new FormControl(oldValues[i][j]))
         }
         else {
-          (this.formArray.at(i) as FormArray).push(new FormControl(0))
+          (formArray.at(i) as FormArray).push(new FormControl(0))
         }
       }
     }
+  }
+
+  resizeMatrix() {
+    this.resizeFormMatrix(this.formArray, this.criteriaCount, this.variablesCount);
     let oldCriterionGoal = this.criterionGoal;
     this.criterionGoal = [];
     for (let i = 0; i < this.criteriaCount; i++) {
@@ -188,19 +158,7 @@ export class MainComponent implements OnInit {
     }
   }
   resizeConstraintsMatrix() {
-    let oldValues = this.constraintsFormArray.value;
-    this.constraintsFormArray.clear();
-    for (let i = 0; i < this.constraintsCount; i++) {
-      this.constraintsFormArray.push(new FormArray([]))
-      for (let j = 0; j < this.variablesCount; j++) {
-        if (i < oldValues.length && j < oldValues[i].length) {
-          (this.constraintsFormArray.at(i) as FormArray).push(new FormControl(oldValues[i][j]))
-        }
-        else {
-          (this.constraintsFormArray.at(i) as FormArray).push(new FormControl(0))
-        }
-      }
-    }
+    this.resizeFormMatrix(this.constraintsFormArray, this.constraintsCount, this.variablesCount);
     let oldConstraintsType = this.constraintType;
     this.constraintType = [];
     for (let i = 0; i < this.constraintsCount; i++) {
@@ -222,7 +180,6 @@ export class MainComponent implements OnInit {
         this.constraintValues.push(new FormControl(0));
       }
     }
-    console.log(this.constraintValues);
   }
   generateRange(start: number, end: number, step: number) {
     let resArray : number[] = [];
@@ -232,10 +189,32 @@ export class MainComponent implements OnInit {
     })
     return resArray;
   }
+  evaluateExpression(expression: string, isYFunc: boolean, centerPoint: number) {
+    let expr = math.compile(expression);
+    let xValues;
+    let yValues;
+    if (isYFunc) {
+      xValues = this.generateRange(centerPoint-50, centerPoint+50, 0.01);
+      yValues = xValues.map(function (x) {
+        return expr.evaluate({x: x})
+      })
+    }
+    else {
+      yValues = this.generateRange(centerPoint-50, centerPoint+50, 0.01);
+      xValues = yValues.map(function (x) {
+        return expr.evaluate({x: x})
+      })
+
+    }
+    let trace : Data = {
+      x: xValues,
+      y: yValues,
+      type: 'scatter',
+      name: expression
+    }
+    return trace;
+  }
   solveTask() {
-    console.log(this.isVariableBounded);
-    //console.log(this.constraintType);
-    //console.log(this.constraintValues);
     let constraintModel : Record<string, any>= {}
 
     //Criteria matrix
@@ -243,9 +222,7 @@ export class MainComponent implements OnInit {
       if (i !== this.globalCriterion) {
         let constraintTypeModel : Record<string, any>= {}
         constraintTypeModel[this.criterionGoal[i]] = this.criterionThreshold.at(i).value;
-        console.log(constraintTypeModel);
         constraintModel["u"+(i+1).toString()] = constraintTypeModel;
-        console.log(constraintModel);
       }
     }
     let variablesModel: Record<string, any>= {}
@@ -271,18 +248,7 @@ export class MainComponent implements OnInit {
         constraintModel["u"+(this.criteriaCount + i+1).toString()] = constraintTypeModel;
         console.log(constraintModel);
     }
-    //let variablesModel: Record<string, any>= {}
-    /*if (this.constraintsCount != 0) {
-      for (let j = 0; j < this.variablesCount; j++) {
-        let variableCriterionModel : Record<string, any>= {}
-        for (let i = 0; i < this.constraintsCount; i++) {
-          variableCriterionModel["u"+ (this.criteriaCount +i+1).toString()] = this.formArray.value[i][j];
-        }
-        variablesModel["x"+(j+1).toString()] = variableCriterionModel;
-      }
-    }*/
 
-    console.log(variablesModel);
     var solver = Solver,
       results,
       model = {
@@ -294,129 +260,53 @@ export class MainComponent implements OnInit {
       };
 
     results = solver.Solve(model);
-    console.log(results);
     this.results = results;
-    console.log(this.formArray.value);
     this.data = [];
-    if (this.results.feasible !== undefined && this.variablesCount == 2) {
+    if (this.results.feasible !== false && this.results.bounded !== false && this.variablesCount == 2) {
       for (let i = 0; i < this.criteriaCount; i++) {
         if (i === this.globalCriterion) {
-          let gradientExpression = `(${this.formArray.value[i][1]}*x)/${this.formArray.value[i][0]}`;
-          let expr = math.compile(gradientExpression);
-          let xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
-          let yValues = xValues.map(function (x) {
-            return expr.evaluate({x: x})
-          })
-          const gradientTrace : Data= {
-            x: xValues,
-            y: yValues,
-            type: 'scatter',
-            name: 'Градиент целевой функции',
-            line: {
-              dash: 'solid',
-              width: 4
-            }
+          let gradientTrace = this.evaluateExpression(`(${this.formArray.value[i][1]}*x)/${this.formArray.value[i][0]}`, true, this.getResults()[0]);
+          gradientTrace.name = 'Градиент целевой функции';
+          gradientTrace.line = {
+            dash: 'solid',
+            width: 4
           }
           this.data.push(gradientTrace);
-          let normalToGradientExpression = `(-1/(${this.formArray.value[i][1]}/${this.formArray.value[i][0]}))*(x-${this.results.x1})+${this.results.x2}`;
-          expr = math.compile(normalToGradientExpression);
-          console.log(normalToGradientExpression);
-          let normalXValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
-          let normalYValues = normalXValues.map(function (x) {
-            return expr.evaluate({x: x})
-          })
-          const normalToGradientTrace : Data= {
-            x: normalXValues,
-            y: normalYValues,
-            type: 'scatter',
-            name: 'Перпендикуляр к градиенту',
-            line: {
-              dash: 'dot',
-              width: 2
-            }
+          let normalToGradientTrace = this.evaluateExpression(`(-1/(${this.formArray.value[i][1]}/${this.formArray.value[i][0]}))*(x-${this.getResults()[0]})+${this.getResults()[1]}`, true, this.getResults()[0]);
+          normalToGradientTrace.name = 'Перпендикуляр к градиенту';
+          normalToGradientTrace.line = {
+            dash: 'dot',
+            width: 2
           }
           this.data.push(normalToGradientTrace);
         }
         else {
-          let xValues : Datum[] = [];
-          let yValues;
-          let expression;
+          let trace : Data;
           if (this.formArray.value[i][0] === 0) {
-            expression = `(${this.criterionThreshold.at(i).value})/${this.formArray.value[i][1]}`;
-            const expr = math.compile(expression)
-
-            xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
-            yValues = xValues.map(function (x) {
-              return expr.evaluate({x: x})
-            })
+            trace = this.evaluateExpression(`(${this.criterionThreshold.at(i).value})/${this.formArray.value[i][1]}`, true, this.getResults()[0]);
           }
           else if (this.formArray.value[i][1] === 0) {
-            expression = `(${this.criterionThreshold.at(i).value})/${this.formArray.value[i][0]}`;
-            const expr = math.compile(expression)
-
-            yValues = this.generateRange(this.results.x2-50, this.results.x2+50, 0.01);
-            xValues = yValues.map(function (x) {
-              return expr.evaluate({x: x})
-            })
+            trace = this.evaluateExpression(`(${this.criterionThreshold.at(i).value})/${this.formArray.value[i][0]}`, false, this.getResults()[1]);
           }
           else {
-            expression = `(${this.criterionThreshold.at(i).value}-${this.formArray.value[i][0]}*x)/${this.formArray.value[i][1]}`;
-            const expr = math.compile(expression)
-
-            xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
-            yValues = xValues.map(function (x) {
-              return expr.evaluate({x: x})
-            })
+            trace = this.evaluateExpression(`(${this.criterionThreshold.at(i).value}-${this.formArray.value[i][0]}*x)/${this.formArray.value[i][1]}`, true, this.getResults()[0]);
           }
-          const trace : Data= {
-            x: xValues,
-            y: yValues,
-            type: 'scatter',
-            name: expression
-          }
-          console.log(trace);
           this.data.push(trace);
         }
 
       }
       for (let i = 0; i < this.constraintsCount; i++) {
-        let xValues : Datum[] = [];
-        let yValues;
-        let expression;
+        let trace : Data;
         if (this.constraintsFormArray.value[i][0] === 0) {
-          expression = `(${this.constraintValues.at(i).value})/${this.constraintsFormArray.value[i][1]}`;
-          const expr = math.compile(expression)
-
-          xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
-          yValues = xValues.map(function (x) {
-            return expr.evaluate({x: x})
-          })
+          trace = this.evaluateExpression(`(${this.constraintValues.at(i).value})/${this.constraintsFormArray.value[i][1]}`, true, this.getResults()[0]);
         }
         else if (this.constraintsFormArray.value[i][1] === 0) {
-          expression = `(${this.constraintValues.at(i).value})/${this.constraintsFormArray.value[i][0]}`;
-          const expr = math.compile(expression)
-
-          yValues = this.generateRange(this.results.x2-50, this.results.x2+50, 0.01);
-          xValues = yValues.map(function (x) {
-            return expr.evaluate({x: x})
-          })
+          trace = this.evaluateExpression(`(${this.constraintValues.at(i).value})/${this.constraintsFormArray.value[i][0]}`, false, this.getResults()[1]);
         }
         else {
-          expression = `(${this.constraintValues.at(i).value}-${this.constraintsFormArray.value[i][0]}*x)/${this.constraintsFormArray.value[i][1]}`;
-          const expr = math.compile(expression)
+          trace = this.evaluateExpression(`(${this.constraintValues.at(i).value}-${this.constraintsFormArray.value[i][0]}*x)/${this.constraintsFormArray.value[i][1]}`, true, this.getResults()[0]);
+        }
 
-          xValues = this.generateRange(this.results.x1-50, this.results.x1+50, 0.01);
-          yValues = xValues.map(function (x) {
-            return expr.evaluate({x: x})
-          })
-        }
-        const trace : Data= {
-          x: xValues,
-          y: yValues,
-          type: 'scatter',
-          name: expression
-        }
-        console.log(trace);
         this.data.push(trace);
       }
       const optimalPointTrace : Data= {
@@ -438,7 +328,6 @@ export class MainComponent implements OnInit {
       else {
         results.push(0);
       }
-      //results.push(this.results["x"+(i+1).toString()])
     }
     return results;
   }
