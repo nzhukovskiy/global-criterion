@@ -52,7 +52,7 @@
         </div>
         <mat-radio-button #globalCheck  name="radio-group" [value]="i" [color]="primaryColor">Главный критерий</mat-radio-button>
         <div class="constraints" *ngIf="globalCheck.checked !== true">
-          <mat-form-field class="example-full-width" appearance="fill">
+          <mat-form-field class="example-full-width goalSelect" appearance="fill">
             <mat-label>Направление оптимизации</mat-label>
             <mat-select [(value)]="criterionGoal[i]">
               <mat-option value="max">min</mat-option>
@@ -79,9 +79,7 @@
     </mat-radio-group>
 
   </form>
-  <div>
-    Главный критерий: {{globalCriterion}}
-  </div>
+
   <h2>Ограничения</h2>
   <form>
     <div class="table-row" *ngFor="let row of constraintsFormArray.controls;index as i">
@@ -91,7 +89,7 @@
           <input matInput type="number" value=0 [formControl]="getFormControl(col)">
         </mat-form-field>
       </div>
-      <mat-form-field class="example-full-width" appearance="fill">
+      <mat-form-field class="example-full-width goalSelect" appearance="fill">
         <mat-label>Тип ограничения</mat-label>
         <mat-select [(value)]="constraintType[i]">
           <mat-option value="max"><=</mat-option>
@@ -110,7 +108,7 @@
       X<sub>{{i+1}}</sub>>=0
     </mat-checkbox>
   </div>
-  <button class = "register_button" mat-raised-button color="primary" (click)="solveTask()">Решить</button>
+  <button class = "solve-button" mat-raised-button color="primary" (click)="solveTask()">Решить</button>
   <h2>Решение</h2>
   <div *ngIf="results != undefined">
     <div *ngIf="results.feasible == true && results.bounded == true">
